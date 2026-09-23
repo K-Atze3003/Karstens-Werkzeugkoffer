@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Karstens Werkzeugkoffer</title>
+    
+    <!-- iOS Web App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Werkzeugkoffer">
+    <meta name="theme-color" content="#1e293b">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        gutex: '#2d6129',
+                        accent: '#f97316'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        input {
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- App Header -->
+    <header class="bg-slate-800 text-white pt-10 pb-4 px-4 border-b border-slate-700/60 sticky top-0 z-30 shadow-lg">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-amber-600 text-white flex items-center justify-center font-bold text-xl shadow-md">
+                    🧰
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight leading-none text-white">Karstens Werkzeugkoffer</h1>
+                    <p class="text-xs text-slate-400 mt-1 font-medium">Baustellen-Profi Tools</p>
+                </div>
+            </div>
+            <button onclick="clearAll()" class="p-2 text-slate-400 hover:text-white active:scale-95 transition-transform" title="Zurücksetzen">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Navigation Tabs / Reiter -->
+        <div class="max-w-md mx-auto mt-4 flex gap-2 overflow-x-auto no-scrollbar pt-1">
+            <button class="px-4 py-2 bg-gutex text-white font-bold text-xs rounded-xl shadow-sm whitespace-nowrap border-b-2 border-accent flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-accent inline-block"></span>
+                Gutex Thermoflex Aufmaß
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto w-full px-4 py-5 flex-grow flex flex-col gap-5">
+
+        <!-- Input Card -->
+        <div class="bg-slate-800 rounded-2xl p-5 card-shadow border border-slate-700/80 flex flex-col gap-4">
+            <label for="measureInput" class="block text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Lichtes Maß (in mm)
+            </label>
+
+            <!-- Input Wrapper -->
+            <div class="relative flex items-center">
+                <input 
+                    type="number" 
+                    id="measureInput" 
+                    placeholder="z.B. 688"
+                    inputmode="decimal"
+                    pattern="[0-9]*"
+                    oninput="calculateMeasure()"
+                    class="w-full text-4xl font-extrabold text-white bg-slate-900 border-2 border-slate-700 rounded-2xl py-4 pl-4 pr-16 focus:outline-none focus:border-emerald-500 transition-all shadow-inner tracking-tight"
+                />
+                <span class="absolute right-4 text-xl font-bold text-slate-400 pointer-events-none">
+                    mm
+                </span>
+                
+                <button 
+                    id="clearInputBtn" 
+                    onclick="clearInput()" 
+                    class="hidden absolute right-14 p-2 text-slate-400 hover:text-white active:scale-90 transition-all"
+                    aria-label="Eingabe löschen">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Quick Add / Presets -->
+            <div class="flex gap-2 overflow-x-auto pt-1">
+                <span class="text-xs text-slate-400 self-center font-medium mr-1">Schnell:</span>
+                <button onclick="setQuickValue(575)" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 active:bg-emerald-600 text-white text-xs font-semibold rounded-lg transition-colors">
+                    575
+                </button>
+                <button onclick="setQuickValue(625)" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 active:bg-emerald-600 text-white text-xs font-semibold rounded-lg transition-colors">
+                    625
+                </button>
+                <button onclick="setQuickValue(688)" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 active:bg-emerald-600 text-white text-xs font-semibold rounded-lg transition-colors">
+                    688
+                </button>
+                <button onclick="setQuickValue(750)" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 active:bg-emerald-600 text-white text-xs font-semibold rounded-lg transition-colors">
+                    750
+                </button>
+            </div>
+        </div>
+
+        <!-- Percentage Settings Card -->
+        <div class="bg-slate-800 rounded-2xl p-5 card-shadow border border-slate-700/80 flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    Zuschlag in %
+                </label>
+                <span class="text-xs font-bold text-accent" id="activePercentLabel">+1.0%</span>
+            </div>
+
+            <div class="grid grid-cols-4 gap-2">
+                <button onclick="setPercentage(1.0)" id="pctBtn-1.0" class="pct-btn py-2 bg-slate-700 hover:bg-slate-600 font-bold text-xs rounded-xl border border-transparent transition-all">
+                    1.0%
+                </button>
+                <button onclick="setPercentage(1.5)" id="pctBtn-1.5" class="pct-btn py-2 bg-slate-700 hover:bg-slate-600 font-bold text-xs rounded-xl border border-transparent transition-all">
+                    1.5%
+                </button>
+                <button onclick="setPercentage(2.0)" id="pctBtn-2.0" class="pct-btn py-2 bg-slate-700 hover:bg-slate-600 font-bold text-xs rounded-xl border border-transparent transition-all">
+                    2.0%
+                </button>
+                <button onclick="setPercentage(3.0)" id="pctBtn-3.0" class="pct-btn py-2 bg-slate-700 hover:bg-slate-600 font-bold text-xs rounded-xl border border-transparent transition-all">
+                    3.0%
+                </button>
+            </div>
+
+            <!-- Custom Percentage Input -->
+            <div class="flex items-center gap-2 mt-1 pt-2 border-t border-slate-700/60">
+                <span class="text-xs text-slate-400 font-medium whitespace-nowrap">Eigene %-Zahl:</span>
+                <div class="relative flex-1">
+                    <input 
+                        type="number" 
+                        id="customPercentInput" 
+                        placeholder="z.B. 2.5" 
+                        step="0.1" 
+                        inputmode="decimal"
+                        oninput="onCustomPercentageInput()"
+                        class="w-full bg-slate-900 border border-slate-700 text-white text-sm font-bold rounded-xl py-1.5 px-3 focus:outline-none focus:border-accent"
+                    />
+                    <span class="absolute right-3 top-1.5 text-xs text-slate-500 pointer-events-none">%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Display Card -->
+        <div id="resultCard" class="bg-gradient-to-br from-gutex to-emerald-800 text-white rounded-2xl p-5 card-shadow transition-all duration-300">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-100">
+                    Schneidmaß
+                </span>
+                <span id="badgePercent" class="text-xs px-2.5 py-1 bg-accent font-extrabold text-white rounded-full shadow-sm">
+                    +1.0%
+                </span>
+            </div>
+
+            <!-- Calculated Main Number -->
+            <div class="flex items-baseline gap-2 my-2">
+                <span id="resultValue" class="text-5xl font-black tracking-tight">
+                    0
+                </span>
+                <span class="text-2xl font-bold text-emerald-100">
+                    mm
+                </span>
+            </div>
+
+            <!-- Details: Exact values and difference -->
+            <div class="mt-4 pt-3 border-t border-emerald-600/60 flex justify-between items-center text-xs text-emerald-100">
+                <div>
+                    Zuschlag: <strong id="diffValue" class="text-white">+0 mm</strong>
+                </div>
+                <div>
+                    Exakt: <strong id="exactValue" class="text-white">0.0 mm</strong>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-4 flex gap-2">
+                <button 
+                    onclick="copyResult()" 
+                    class="flex-1 bg-white/10 hover:bg-white/20 active:bg-white/30 text-white text-xs font-bold py-3 px-3 rounded-xl flex items-center justify-center gap-2 transition-all border border-white/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                    <span>Ergebnis kopieren</span>
+                </button>
+
+                <button 
+                    onclick="toggleRounding()" 
+                    id="roundingToggleBtn" 
+                    class="bg-white/10 hover:bg-white/20 active:bg-white/30 text-white text-xs font-semibold py-3 px-3 rounded-xl transition-all border border-white/10 whitespace-nowrap">
+                    Runden: AN
+                </button>
+            </div>
+        </div>
+
+        <!-- iOS Homescreen Setup Guide -->
+        <div class="bg-slate-800/60 rounded-2xl p-4 border border-slate-700/60 text-xs text-slate-300">
+            <h3 class="font-bold text-white mb-2 flex items-center gap-1.5 text-sm">
+                <span>📱</span> Auf dem iPhone als App speichern:
+            </h3>
+            <ol class="list-decimal pl-4 space-y-1.5 text-slate-400">
+                <li>Diese Seite im Safari-Browser öffnen.</li>
+                <li>Unten in der Safari-Leiste auf das <strong>Teilen-Symbol</strong> <span class="text-white font-bold">⎋</span> (Quadrat mit Pfeil nach oben) tippen.</li>
+                <li>Nach unten scrollen und <strong>"Zum Home-Bildschirm"</strong> auswählen.</li>
+                <li>Oben rechts auf <strong>"Hinzufügen"</strong> tippen – fertig!</li>
+            </ol>
+        </div>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white border border-slate-700 px-4 py-2.5 rounded-full text-xs font-medium shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <span id="toastMessage">Ergebnis kopiert!</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="max-w-md mx-auto w-full px-4 py-4 text-center text-xs text-slate-500">
+        <p>Karstens Werkzeugkoffer &bull; Gutex Thermoflex Aufmaß</p>
+    </footer>
+
+    <script>
+        // State
+        let currentPercentage = 1.0;
+        let isRoundingActive = true;
+
+        // Elements
+        const inputEl = document.getElementById('measureInput');
+        const resultValEl = document.getElementById('resultValue');
+        const diffValEl = document.getElementById('diffValue');
+        const exactValEl = document.getElementById('exactValue');
+        const clearBtn = document.getElementById('clearInputBtn');
+        const roundingToggleBtn = document.getElementById('roundingToggleBtn');
+        const activePercentLabel = document.getElementById('activePercentLabel');
+        const badgePercent = document.getElementById('badgePercent');
+        const customPercentInput = document.getElementById('customPercentInput');
+
+        /**
+         * Main Calculation Logic
+         */
+        function calculateMeasure() {
+            const val = parseFloat(inputEl.value);
+
+            if (inputEl.value.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+
+            if (isNaN(val) || val <= 0) {
+                resultValEl.textContent = '0';
+                diffValEl.textContent = '+0 mm';
+                exactValEl.textContent = '0.0 mm';
+                return;
+            }
+
+            // Calculation based on dynamic percentage
+            const multiplier = 1 + (currentPercentage / 100);
+            const exactResult = val * multiplier;
+            const diff = exactResult - val;
+
+            exactValEl.textContent = exactResult.toFixed(1) + ' mm';
+            diffValEl.textContent = '+' + diff.toFixed(1) + ' mm';
+
+            if (isRoundingActive) {
+                resultValEl.textContent = Math.round(exactResult).toLocaleString('de-DE');
+            } else {
+                resultValEl.textContent = exactResult.toFixed(1).replace('.', ',');
+            }
+        }
+
+        /**
+         * Change Percentage Percentage
+         */
+        function setPercentage(pct) {
+            currentPercentage = parseFloat(pct);
+            customPercentInput.value = '';
+            updatePercentageUI();
+            calculateMeasure();
+        }
+
+        /**
+         * Handler for custom percentage input
+         */
+        function onCustomPercentageInput() {
+            const val = parseFloat(customPercentInput.value);
+            if (!isNaN(val) && val >= 0) {
+                currentPercentage = val;
+                updatePercentageUI(true);
+                calculateMeasure();
+            }
+        }
+
+        /**
+         * Update Percentage UI styles
+         */
+        function updatePercentageUI(isCustom = false) {
+            const formatted = currentPercentage.toFixed(1).replace('.0', '') + '%';
+            activePercentLabel.textContent = '+' + formatted;
+            badgePercent.textContent = '+' + formatted;
+
+            // Update button highlights
+            document.querySelectorAll('.pct-btn').forEach(btn => {
+                btn.classList.remove('bg-accent', 'text-white', 'border-amber-400');
+                btn.classList.add('bg-slate-700', 'text-slate-200');
+            });
+
+            if (!isCustom) {
+                const activeBtn = document.getElementById(`pctBtn-${currentPercentage.toFixed(1)}`);
+                if (activeBtn) {
+                    activeBtn.classList.remove('bg-slate-700', 'text-slate-200');
+                    activeBtn.classList.add('bg-accent', 'text-white', 'border-amber-400');
+                }
+            }
+        }
+
+        function setQuickValue(mm) {
+            inputEl.value = mm;
+            calculateMeasure();
+            if (navigator.vibrate) navigator.vibrate(15);
+        }
+
+        function clearInput() {
+            inputEl.value = '';
+            calculateMeasure();
+            inputEl.focus();
+        }
+
+        function clearAll() {
+            clearInput();
+            setPercentage(1.0);
+            showToast('Eingaben zurückgesetzt');
+        }
+
+        function toggleRounding() {
+            isRoundingActive = !isRoundingActive;
+            roundingToggleBtn.textContent = isRoundingActive ? 'Runden: AN' : 'Runden: AUS';
+            calculateMeasure();
+            showToast(isRoundingActive ? 'Runden aktiviert' : 'Exakte Kommazahl aktiviert');
+        }
+
+        function copyResult() {
+            const valToCopy = resultValEl.textContent.trim();
+            if (valToCopy === '0') return;
+
+            const textToCopy = `${valToCopy} mm`;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    showToast(`${textToCopy} in Zwischenablage!`);
+                });
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast(`${textToCopy} in Zwischenablage!`);
+                } catch (err) {
+                    showToast('Kopieren fehlgeschlagen');
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        let toastTimeout;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            
+            toastMsg.textContent = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2000);
+        }
+
+        // Init
+        window.addEventListener('DOMContentLoaded', () => {
+            setPercentage(1.0);
+            inputEl.value = '688';
+            calculateMeasure();
+        });
+    </script>
+</body>
+</html>
